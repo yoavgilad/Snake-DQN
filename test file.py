@@ -1,4 +1,4 @@
-from mytime import now, wait, add_time, runtime
+from mytime import now, add_time, runtime
 import graphs
 import logs
 import emails
@@ -19,21 +19,17 @@ from agents import DQNAgent, tensor_reshape, unpack_tensor_reshape, HumanPlayer
 # --------------------------------------------------------------------
 
 
-# data30 = logs.read_log('30x30 log')
-# data40 = logs.read_log('50x50 log')
-# print(data30, '\n', data40)
-# data = [['training iterations', 'mean score', '30x30 and 40x40 performance over training period\nenlarged from 22x22'],
-#         data30[1], data40[1]]
-# fig, ax = plt.subplots()
-# labels = data[0]
-# ax.set_xlabel(labels[0])
-# ax.set_ylabel(labels[1])
-# ax.set_title(labels[2])
-# xs, ys, label = data[1]
-# ax.plot(xs, ys, label=label, color='orange')
-# xs, ys, label = data[2]
-# ax.plot(xs, ys, label=label, color='red')
-# ax.legend()
-# plt.savefig('enlargement extent.png')
-# plt.show()
-# plt.close()
+# # find true relations between evaluation scores and training scores.
+# # used for red rectangles' construction
+# score, total_reward, episode_length = logs.read_log('15x15 4 metrics')
+# score, total_reward, episode_length = score[1], total_reward[1], episode_length[1]
+# iterations = 0
+# flag = True
+# for game in range(len(episode_length)):
+#     iterations += episode_length[game] / 100
+#     if flag and iterations > 1000:  # ignore initial memory collection
+#         flag = False
+#         iterations = 0
+#     if iterations > 60000:
+#         print('game:', game, '  fits:', iterations)
+#         break

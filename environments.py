@@ -3,15 +3,15 @@ import numpy as np
 from numpy.typing import NDArray
 import os
 
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = '1'  # Hide pygame's welcome output
 import pygame
 
 
 class Snake:
-    fps = 60
+    fps = 30  # fps limit; only relevant when rendering
     rewards = {'food': 15, 'hit wall': -10, 'hit body': -10, 'survive': 0, 'move closer': 1, 'move further': -1}
     # move closer and move further rewards only apply if MAX_FOOD=1
-    # representations for different tile types
+    # representations for different tile types:
     HEAD = 0.5
     BODY = -0.5
     FOOD = 1
@@ -22,7 +22,7 @@ class Snake:
         """
         :param loop_threshold: negative value = no loop declaration
         """
-        # declaring variables for comfortability
+        # declaring variables
         self.HEIGHT, self.WIDTH = shape
         self.state: NDArray[float] = np.array([])
         self.body: list[tuple[int, int]] = []
@@ -31,21 +31,24 @@ class Snake:
         self.score: int = 0
         self.total_reward: int = 0
         self.episode_length: int = 0
-
+        # loop detection
         self.loop_threshold: int = loop_threshold  # consecutive moves without food before declaring loop
         self.loop_counter: int = 0
+        # rendering
         self.is_render: bool = render
         if self.is_render:
             self.clock = pygame.time.Clock()
-            self.WINDOW_SIZE = 750 // self.HEIGHT
+            self.TILE_SIZE = 750 // self.HEIGHT
             pygame.init()
-            self.screen = pygame.display.set_mode((self.HEIGHT * self.WINDOW_SIZE, self.WIDTH * self.WINDOW_SIZE))
+            self.screen = pygame.display.set_mode((self.HEIGHT * self.TILE_SIZE, self.WIDTH * self.TILE_SIZE))
             pygame.display.set_caption('Snake')
 
     def render(self):
+        # Iterate over tiles
         for y in range(self.HEIGHT):
             for x in range(self.WIDTH):
-                rect = pygame.Rect(x * self.WINDOW_SIZE, y * self.WINDOW_SIZE, self.WINDOW_SIZE, self.WINDOW_SIZE)
+                rect = pygame.Rect(x * self.TILE_SIZE, y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE)
+                # Draw the tile and it's outline
                 match self.state[y, x]:
                     case self.EMPTY:
                         pygame.draw.rect(self.screen, (0, 150, 0), rect)
@@ -64,7 +67,7 @@ class Snake:
         pygame.display.flip()  # Update the display
 
     def reset(self, start_length: int = 4, foods: int = 1) -> NDArray[float]:
-        # reset variables
+        # Reset variables
         self.loop_counter = 0
         self.body = []
         self.foods = []
@@ -78,36 +81,36 @@ class Snake:
             self.state[i][0] = self.WALL
             self.state[i][-1] = self.WALL
 
-        # choose a random starting position
+        # Choose random starting position and direction
         start_pos = None
         look_dir = random.randint(1, 4)
         match look_dir:
-            case 1:  # up
+            case 1:  # Up
                 start_pos = (random.randint(2, self.HEIGHT - start_length - 2),
                              random.randint(2, self.WIDTH - 3))
                 for i in range(1, start_length):
                     self.state[start_pos[0] + i, start_pos[1]] = self.BODY
                     self.body.insert(0, (start_pos[0] + i, start_pos[1]))
-            case 2:  # right
+            case 2:  # Right
                 start_pos = (random.randint(2, self.HEIGHT - 3),
                              random.randint(start_length + 1, self.WIDTH - 2))
                 for i in range(1, start_length):
                     self.state[start_pos[0], start_pos[1] - i] = self.BODY
                     self.body.insert(0, (start_pos[0], start_pos[1] - i))
-            case 3:  # down
+            case 3:  # Down
                 start_pos = (random.randint(start_length + 1, self.HEIGHT - 2),
                              random.randint(2, self.WIDTH - 3))
                 for i in range(1, start_length):
                     self.state[start_pos[0] - i, start_pos[1]] = self.BODY
                     self.body.insert(0, (start_pos[0] - i, start_pos[1]))
-            case 4:  # left
+            case 4:  # Left
                 start_pos = (random.randint(2, self.HEIGHT - 3),
                              random.randint(2, self.WIDTH - start_length - 2))
                 for i in range(1, start_length):
                     self.state[start_pos[0], start_pos[1] + i] = self.BODY
                     self.body.insert(0, (start_pos[0], start_pos[1] + i))
 
-        # add head
+        # Add head
         self.body.append(start_pos)
         self.state[start_pos[0], start_pos[1]] = self.HEAD
 
@@ -116,37 +119,37 @@ class Snake:
         return np.copy(self.state)
 
     def step(self, action: int) -> tuple[NDArray[float], int, bool]:
-        reward = self.rewards['survive']
-        done = False
+        done = False  # Assign default value
+        # Update the snake's body based on action
         match action:
-            case 0:  # up
+            case 0:  # Up
                 if self.body[-1][0] - 1 != self.body[-2][0]:
                     self.body.append((self.body[-1][0] - 1, self.body[-1][1]))
                 else:
                     self.body.append((self.body[-1][0] + 1, self.body[-1][1]))
-            case 1:  # right
+            case 1:  # Right
                 if self.body[-1][1] + 1 != self.body[-2][1]:
                     self.body.append((self.body[-1][0], self.body[-1][1] + 1))
                 else:
                     self.body.append((self.body[-1][0], self.body[-1][1] - 1))
-            case 2:  # down
+            case 2:  # Down
                 if self.body[-1][0] + 1 != self.body[-2][0]:
                     self.body.append((self.body[-1][0] + 1, self.body[-1][1]))
                 else:
                     self.body.append((self.body[-1][0] - 1, self.body[-1][1]))
-            case 3:  # left
+            case 3:  # Left
                 if self.body[-1][1] - 1 != self.body[-2][1]:
                     self.body.append((self.body[-1][0], self.body[-1][1] - 1))
                 else:
                     self.body.append((self.body[-1][0], self.body[-1][1] + 1))
 
+        # Determine reward, detect if done, and update state
         match self.state[self.body[-1][0], self.body[-1][1]]:
             case self.EMPTY:
+                # Check if snake moved closer/further from the food
+                # Only applies with 1 food on the board
                 if len(self.foods) == 1:
-                    diff = (np.sqrt(
-                        (self.body[-2][0] - self.foods[0][0]) ** 2 + (self.body[-2][1] - self.foods[0][1]) ** 2) -
-                            np.sqrt((self.body[-1][0] - self.foods[0][0]) ** 2 + (
-                                    self.body[-1][1] - self.foods[0][1]) ** 2))
+                    diff = (np.sqrt((self.body[-2][0] - self.foods[0][0]) ** 2 + (self.body[-2][1] - self.foods[0][1]) ** 2) - np.sqrt((self.body[-1][0] - self.foods[0][0]) ** 2 + (self.body[-1][1] - self.foods[0][1]) ** 2))
                     if diff > 0:
                         reward = self.rewards['move closer']
                     elif diff < 0:
@@ -155,18 +158,22 @@ class Snake:
                         reward = self.rewards['survive']
                 else:
                     reward = self.rewards['survive']
+                # Update state
                 self.state[self.body[-1][0], self.body[-1][1]] = self.HEAD
                 self.state[self.body[-2][0], self.body[-2][1]] = self.BODY
                 self.state[self.body[0][0], self.body[0][1]] = self.EMPTY
                 self.body.pop(0)
+                # Apply loop detection
                 self.loop_counter += 1
                 if self.loop_counter == self.loop_threshold:
                     done = True
             case self.FOOD:
-                self.loop_counter = 0
+                self.loop_counter = 0  # Reset loop detection
                 reward = self.rewards['food']
+                # Update state
                 self.state[self.body[-1][0], self.body[-1][1]] = self.HEAD
                 self.state[self.body[-2][0], self.body[-2][1]] = self.BODY
+                # Update foods
                 self.foods.remove(self.body[-1])
                 self.generate_food(1)
                 self.score += 1
@@ -176,18 +183,25 @@ class Snake:
             case self.WALL:
                 reward = self.rewards['hit wall']
                 done = True
+            case _:
+                raise ValueError('Invalid tile value reached')
+
+        # Update metrics
         self.episode_length += 1
         self.total_reward += reward
+        # Update animation
         if self.is_render:
             self.render()
             self.clock.tick(self.fps)
-        return np.copy(self.state), reward, done
+        return np.copy(self.state), reward, done  # return feedback
 
     def generate_food(self, num_foods: int = 1) -> None:
-        for i in range(num_foods):
+        for i in range(num_foods):  # Repeat for the amount of required foods
+            # Choose a random empty tile
             pos = random.randint(0, self.HEIGHT - 1), random.randint(0, self.WIDTH - 1)
-            while self.state[pos[0], pos[1]] != 0:
+            while self.state[pos[0], pos[1]] != self.EMPTY:
                 pos = random.randint(0, self.HEIGHT - 1), random.randint(0, self.WIDTH - 1)
+            # Assign tile as food
             self.state[pos[0], pos[1]] = self.FOOD
             self.foods.append(pos)
 
@@ -197,7 +211,7 @@ class Snake:
 
 
 class Snake3:
-    fps = 60
+    fps = 30
     rewards = {'food': 15, 'hit wall': -10, 'hit body': -10, 'survive': 0, 'move closer': 1, 'move further': -1}
     # move closer and move further rewards only apply if MAX_FOOD=1
     # representations for different tile types
@@ -226,15 +240,15 @@ class Snake3:
         self.is_render: bool = render
         if self.is_render:
             self.clock = pygame.time.Clock()
-            self.WINDOW_SIZE = 750 // self.HEIGHT
+            self.TILE_SIZE = 750 // self.HEIGHT
             pygame.init()
-            self.screen = pygame.display.set_mode((self.HEIGHT * self.WINDOW_SIZE, self.WIDTH * self.WINDOW_SIZE))
+            self.screen = pygame.display.set_mode((self.HEIGHT * self.TILE_SIZE, self.WIDTH * self.TILE_SIZE))
             pygame.display.set_caption('Snake')
 
     def render(self):
         for y in range(self.HEIGHT):
             for x in range(self.WIDTH):
-                rect = pygame.Rect(x * self.WINDOW_SIZE, y * self.WINDOW_SIZE, self.WINDOW_SIZE, self.WINDOW_SIZE)
+                rect = pygame.Rect(x * self.TILE_SIZE, y * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE)
                 match self.state[y, x]:
                     case self.EMPTY:
                         pygame.draw.rect(self.screen, (0, 150, 0), rect)
@@ -400,19 +414,23 @@ class VecSnake:
         return np.array([self.envs[i].reset(start_lengths[i], foods[i]) for i in range(self.size)])
 
     def step(self, actions: list[int]) -> tuple[list[NDArray[float]], list[int], list[bool]]:
+        # Initialize feedbacks
         new_states = []
         rewards = []
         dones = []
+        # Iterate over all active environments
         for i in range(len(actions)):
+            # Perform step
             if self.continuous:
                 feedback = self.envs[i].step(actions[i])
             else:
                 feedback = self.active_envs[i].step(actions[i])
+            # Save feedback
             new_states.append(feedback[0])
             rewards.append(feedback[1])
             dones.append(feedback[2])
 
-        return new_states, rewards, dones
+        return new_states, rewards, dones  # Return feedbacks
 
     def get_states(self) -> NDArray[float]:
         return np.array([np.copy(self.envs[i].state) for i in range(self.size)])
