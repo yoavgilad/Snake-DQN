@@ -9,9 +9,9 @@ import os
 
 def send_message(subject: str, body: str, filenames: list[str] = None):
     # Define sender and recipient
-    receiver_email = "yoavgilad555@gmail.com"
-    sender_email = "yoavgilad555@gmail.com"
-    sender_password = "hkxw clvy hpsy oenr"  # Use an App Password if 2FA is enabled
+    receiver_email = "example@gmail.com"
+    sender_email = "example@gmail.com"
+    sender_password = "xxxx xxxx xxxx xxxx"  # Use an App Password if 2FA is enabled
     # Define email message object
     msg = MIMEMultipart()
     msg['From'] = sender_email
