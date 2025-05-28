@@ -21,7 +21,7 @@ import pstats
 import io
 
 profile: bool = True
-multi_processing: bool = False  # Causes retracing in TensorFlow when pygame is present
+multi_processing: bool = False  # Causes retracing in TensorFlow when Pygame is present
 save_log: bool = True  # Evaluation mean scores
 save_metrics: bool = True  # Training scores, episode lengths, and total rewards
 save_graph: bool = True  # Happens anyway if summary email is active
@@ -81,30 +81,6 @@ parameters = \
                   'PATIENCE': 200,
                   'PATIENCE_MEMORY_SIZE': 100,
                   'STOP_EARLY': False, },
-        '13x13 duel': {'OLD_ACTIONS': True,
-                       'HEIGHT': 13,
-                       'WIDTH': 13,
-                       'MIN_FOODS': 1,
-                       'MAX_FOODS': 1,
-                       'MIN_START_LENGTH': 4,
-                       'MAX_START_LENGTH': 4,
-                       'FITS': 1000,
-                       'ENVS': 5,
-                       'FIT_FREQ': 30,
-                       'EPOCHS_PER_FIT': 1,
-                       'MINIBATCH_SIZE': 1000,
-                       'MEMORY_SIZE': 100_000,
-                       'TARGET_SYNC_FREQ': 100,
-                       'TAU': 1,
-                       'GAMMA': 0.95,
-                       'EPSILON': 0.01,
-                       'EPSILON_DECAY': 0.997,
-                       'MIN_EPSILON': 0.01,
-                       'DECAY_BEFORE_TRAINING': False,
-
-                       'PATIENCE': 200,
-                       'PATIENCE_MEMORY_SIZE': 100,
-                       'STOP_EARLY': False, },
         '18x18': {'OLD_ACTIONS': True,
                   'HEIGHT': 18,
                   'WIDTH': 18,
@@ -175,28 +151,6 @@ parameters = \
                     'EPSILON_DECAY': 1,
                     'MIN_EPSILON': 0.05,
                     'DECAY_BEFORE_TRAINING': True},
-        '40x40': {'OLD_ACTIONS': True,
-                  'HEIGHT': 40,
-                  'WIDTH': 40,
-                  'MIN_FOODS': 1,
-                  'MAX_FOODS': 1,
-                  'MIN_START_LENGTH': 4,
-                  'MAX_START_LENGTH': 4,
-                  'ROUNDS': 20,
-                  'FITS': 1000,
-                  'ENVS': 100,
-                  'FIT_FREQ': 1,
-                  'EPOCHS_PER_FIT': 1,
-                  'MINIBATCH_SIZE': 1000,
-                  'MEMORY_SIZE': 200_000,
-                  'MIN_MEMORY_SIZE': 10_000,
-                  'TARGET_SYNC_FREQ': 100,
-                  'TAU': 1,
-                  'GAMMA': 0.95,
-                  'EPSILON': 1,
-                  'EPSILON_DECAY': 0.9998,
-                  'MIN_EPSILON': 0.05,
-                  'DECAY_BEFORE_TRAINING': True},
         '50x50': {'OLD_ACTIONS': True,
                   'HEIGHT': 50,
                   'WIDTH': 50,
@@ -241,50 +195,28 @@ parameters = \
                     'EPSILON_DECAY': 0.999925,
                     'MIN_EPSILON': 0.01,
                     'DECAY_BEFORE_TRAINING': True},
-        '17x17 demo': {'OLD_ACTIONS': False,
-                       'HEIGHT': 17,
-                       'WIDTH': 17,
+        '10x10 demo': {'OLD_ACTIONS': False,
+                       'HEIGHT': 10,
+                       'WIDTH': 10,
                        'MIN_FOODS': 1,
                        'MAX_FOODS': 1,
                        'MIN_START_LENGTH': 4,
                        'MAX_START_LENGTH': 4,
-                       'ROUNDS': 100,
-                       'FITS': 1000,
-                       'ENVS': 100,
+                       'ROUNDS': 5,
+                       'FITS': 50,
+                       'ENVS': 20,
                        'FIT_FREQ': 1,
                        'EPOCHS_PER_FIT': 1,
-                       'MINIBATCH_SIZE': 1000,
-                       'MEMORY_SIZE': 1_000_000,
-                       'MIN_MEMORY_SIZE': 100_000,
-                       'TARGET_SYNC_FREQ': 100,
+                       'MINIBATCH_SIZE': 100,
+                       'MEMORY_SIZE': 10_000,
+                       'MIN_MEMORY_SIZE': 1000,
+                       'TARGET_SYNC_FREQ': 30,
                        'TAU': 1,
                        'GAMMA': 0.95,
                        'EPSILON': 1,
-                       'EPSILON_DECAY': 0.999925,
+                       'EPSILON_DECAY': 0.995,
                        'MIN_EPSILON': 0.01,
                        'DECAY_BEFORE_TRAINING': True},
-        '16x16 profile demo': {'OLD_ACTIONS': False,
-                               'HEIGHT': 16,
-                               'WIDTH': 16,
-                               'MIN_FOODS': 1,
-                               'MAX_FOODS': 1,
-                               'MIN_START_LENGTH': 4,
-                               'MAX_START_LENGTH': 4,
-                               'ROUNDS': 10,
-                               'FITS': 500,
-                               'ENVS': 10,
-                               'FIT_FREQ': 1,
-                               'EPOCHS_PER_FIT': 1,
-                               'MINIBATCH_SIZE': 100,
-                               'MEMORY_SIZE': 30_000,
-                               'MIN_MEMORY_SIZE': 1_000,
-                               'TARGET_SYNC_FREQ': 50,
-                               'TAU': 1,
-                               'GAMMA': 0.95,
-                               'EPSILON': 1,
-                               'EPSILON_DECAY': 0.999,
-                               'MIN_EPSILON': 0.01,
-                               'DECAY_BEFORE_TRAINING': True},
     }
 
 # Loading of training parameters
@@ -391,7 +323,7 @@ def train_agent() -> None:
         vec_env = VecSnake((agent.model.input_shape[1], agent.model.input_shape[2], ENVS), render=False)
     vec_env.reset_all([random.randint(MIN_START_LENGTH, MAX_START_LENGTH) for i in range(ENVS)],
                       [random.randint(MIN_FOODS, MAX_FOODS) for i in range(ENVS)])
-    # Define evaluation eval_data structure according to format. Used for human monitoring and logging.
+    # Define evaluation data structure according to format. Used for human monitoring and logging.
     if os.path.exists(LOG_NAME + '.pkl'):  # Continue an existing log
         eval_data = logs.read_log(LOG_NAME)
         past_iterations = eval_data[1][0][-1]
@@ -449,7 +381,7 @@ def train_agent() -> None:
         if live_emails:  # Send a training status email
             graphs.new_graph(eval_data, False, LOG_NAME)
             emails.send_message(f'round {r}/{ROUNDS} live update - {LOG_NAME}',
-                                f'Estimated finish: {estimation}\nRaw evaluation eval_data so far:\n{eval_data}',
+                                f'Estimated finish: {estimation}\nRaw evaluation data so far:\n{eval_data}',
                                 [LOG_NAME + '.png'])
 
     # ------------- Finalization Sequence -------------

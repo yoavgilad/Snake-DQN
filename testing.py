@@ -10,14 +10,14 @@ from agents import HumanPlayer, RandomPlayer
 # ------------------------------------------------------------------------------------
 model_name = '15x15 4'  # 'random' for random player, 'human' for human player
 render = True  # If render = False then all episodes will be played in parallel
-fps = 30  # FPS limit; may run slower for extremely large models
-episodes = 1000  # Amount of games. -1 for endless evaluation, requires render=True
-loop_threshold = -1  # Negative value for no loop detection
+fps = 20  # FPS limit; may run slower for extremely large models
+episodes = 100  # Amount of games. -1 for endless evaluation, requires render=True
+loop_threshold = 100  # Negative value for no loop detection
 foods = (1, 1)  # A random int in this range is chosen each episode
 start_lengths = (4, 4)  # A random int in this range is chosen each episode
 save_best = True  # Whether to save the best game
 old_actions = False  # True = relative movement, False = absolute movement
-mask = True  # Whether to mask instantly-losing actions
+mask = False  # Whether to mask instantly-losing actions
 height, width = 16, 16  # Only affects human & random player
 # ------------------------------------------------------------------------------------
 

@@ -141,7 +141,7 @@ def score_evaluation(model, episodes: int = 100, loop_threshold: int = 200, food
         for score in vec_env.scores():
             scores_dist[score] += 1
         # Smoothen data
-        moving_average = 10
+        moving_average = 5
         smooth_scores_dist = np.convolve(scores_dist, np.ones(moving_average) / moving_average, mode='valid')
         # Define graph configuration according to the format
         graph_data = [['score', 'number of games',
